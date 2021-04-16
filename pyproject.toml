@@ -2,7 +2,7 @@
 name = "deps-report"
 version = "0.1.0"
 description = ""
-authors = ["Corentin Garcia <corenting@gmail.com>"]
+authors = ["Corentin Garcia <cgarcia@meilleursagents.com>"]
 
 [tool.poetry.scripts]
 deps-report = "deps_report.main:main"

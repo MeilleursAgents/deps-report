@@ -1,0 +1,10 @@
+name: deps-report
+author: Corentin Garcia <cgarcia@meilleursagents.com>
+description: Display a report of installed dependencies
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+inputs:
+  file:
+    description: "The path to the dependencies file (Pipfile.lock...)"
+    required: true

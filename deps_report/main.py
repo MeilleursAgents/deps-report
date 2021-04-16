@@ -1,3 +1,5 @@
+import os
+
 import click
 from packaging import version as version_parser
 from tabulate import tabulate
@@ -8,13 +10,17 @@ from deps_report.version_checkers import get_version_checker_for_parser
 
 
 @click.command()
-@click.argument("filename", type=click.Path(exists=True))
-def main(filename: str) -> None:
+@click.argument(
+    "file",
+    type=click.Path(exists=True),
+    default=lambda: os.environ.get("INPUT_FILE", ""),
+)
+def main(file: str) -> None:
     """Generate report for the state of your dependencies."""
     click.secho(f"deps-report v{__version__}", fg="green")
-    click.secho(f"File is: {filename}", fg="yellow")
+    click.secho(f"File is: {file}", fg="yellow")
 
-    parser_class = get_parser_for_file_path(filename)
+    parser_class = get_parser_for_file_path(file)
     dependencies = parser_class.get_dependencies()
 
     click.secho(f"Found {len(dependencies)} dependencies\n", fg="yellow")
