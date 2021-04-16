@@ -130,3 +130,6 @@ dmypy.json
 
 # Visual Studio Code
 .vscode/
+
+# Test files
+Pipfile.lock

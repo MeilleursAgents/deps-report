@@ -1,5 +1,11 @@
 # deps-report
 
-🏗 Work in progress
+Display a report of the outdated dependencies for a specified lockfile.
 
-Experiment to generate reports about dependencies state.
+## Supported dependencies formats
+- Pipenv (through the `Pipfile.lock` file)
+
+## Usage
+
+Run the tool with the file specified as a path:
+`deps-report Pipfile.lock`
