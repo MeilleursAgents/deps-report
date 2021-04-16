@@ -19,3 +19,9 @@ style:
 .SILENT: test
 test:
 	$(PYTHON) pytest tests/
+
+
+.PHONY: build
+.SILENT: build
+build:
+	poetry build
