@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from packaging import version as version_parser
 from requests import HTTPError
 
-from deps_report.models import Dependency
+from deps_report.models import Dependency, VerificationError
 
 logger = logging.getLogger(__name__)
 
@@ -60,8 +60,8 @@ class SimpleVersionChecker:
             except ValueError:
                 continue
             except HTTPError:
-                logger.exception("Error while fetching repository informations")
+                logger.info("Error while fetching repository informations")
             else:
                 return version
 
-        raise ValueError(f"Cannot check version for {dependency.name}")
+        raise VerificationError(f"Cannot check version for {dependency.name}")
