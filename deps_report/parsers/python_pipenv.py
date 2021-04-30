@@ -6,7 +6,7 @@ from deps_report.models import Dependency, DependencyRepository
 from deps_report.utils.templating import expand_template_string_with_env
 
 
-class PipenvParser:
+class PythonPipenvParser:
 
     DEFAULT_REPOSITORY = DependencyRepository(
         name="pypi",

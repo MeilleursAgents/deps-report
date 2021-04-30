@@ -9,6 +9,7 @@ from deps_report import __version__
 from deps_report.models import Dependency, VerificationError
 from deps_report.parsers import get_parser_for_file_path
 from deps_report.version_checkers import get_version_checker_for_parser
+from deps_report.vulnerabilities_checkers import get_vulnerability_checker_for_parser
 
 
 def _print_results(
@@ -16,6 +17,8 @@ def _print_results(
     results_table: List,
     errors_headers: List[str],
     errors_table: List,
+    vulnerabilities_headers: List[str],
+    vulnerabilities_table: List,
 ) -> None:
     if len(errors_table) > 0:
         click.secho(
@@ -29,10 +32,21 @@ def _print_results(
     else:
         click.secho("\nNo outdated dependencies found:", fg="green")
 
+    if len(vulnerabilities_table) > 0:
+        click.secho("\nVulnerabilities found:", fg="red")
+        click.echo(
+            f'{tabulate(vulnerabilities_table, vulnerabilities_headers, tablefmt="plain")}'
+        )
 
-def _process_dependencies(dependencies: List[Dependency], version_checker: Any) -> None:
+
+def _process_dependencies(
+    dependencies: List[Dependency], version_checker: Any, vulnerability_checker: Any
+) -> None:
     results_headers = ["Dependency", "Installed version", "Latest version"]
     results_table = []
+
+    vulnerabilities_headers = ["Dependency", "Advisory", "Versions impacted"]
+    vulnerabilities_table = []
 
     errors_headers = ["Dependency", "Error"]
     errors_table = []
@@ -43,6 +57,8 @@ def _process_dependencies(dependencies: List[Dependency], version_checker: Any) 
         length=len(dependencies),
     ) as bar:
         for dependency in bar:
+
+            # Check latest version
             try:
                 latest_version = version_parser.parse(
                     version_checker.get_latest_version_of_dependency(dependency)
@@ -52,11 +68,36 @@ def _process_dependencies(dependencies: List[Dependency], version_checker: Any) 
                 continue
 
             current_version = version_parser.parse(dependency.version)
-
             if current_version < latest_version:
                 results_table.append([dependency.name, current_version, latest_version])
 
-    _print_results(results_headers, results_table, errors_headers, errors_table)
+            # Check if current version is vulnerable
+            try:
+                vulnerability = vulnerability_checker.check_if_package_is_vulnerable(
+                    dependency
+                )
+            except VerificationError:
+                errors_table.append(
+                    [dependency.name, "Could not check for vulnerability status"]
+                )
+            else:
+                if vulnerability:
+                    vulnerabilities_table.append(
+                        [
+                            dependency.name,
+                            vulnerability.advisory,
+                            vulnerability.versions_impacted,
+                        ]
+                    )
+
+    _print_results(
+        results_headers,
+        results_table,
+        errors_headers,
+        errors_table,
+        vulnerabilities_headers,
+        vulnerabilities_table,
+    )
 
 
 @click.command()
@@ -76,5 +117,6 @@ def main(file: str) -> None:
     click.secho(f"Found {len(dependencies)} dependencies\n", fg="yellow")
 
     version_checker = get_version_checker_for_parser(type(parser_class))
+    vulnerability_checker = get_vulnerability_checker_for_parser(type(parser_class))
 
-    _process_dependencies(dependencies, version_checker)
+    _process_dependencies(dependencies, version_checker, vulnerability_checker)

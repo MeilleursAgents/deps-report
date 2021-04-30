@@ -11,7 +11,7 @@ from deps_report.models import Dependency, VerificationError
 logger = logging.getLogger(__name__)
 
 
-class SimpleVersionChecker:
+class PythonVersionChecker:
     def _get_version_from_wheel_filename(self, filename: str) -> str:
         return filename.split("-")[1]
 
