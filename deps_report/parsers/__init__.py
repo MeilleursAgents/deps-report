@@ -7,7 +7,7 @@ __all__ = [
     PythonPipenvParser.__name__,
 ]
 
-PARSERS_RULES = {r"Pipfile(.lock)?$": PythonPipenvParser}
+PARSERS_RULES = {r".*Pipfile(.lock)?$": PythonPipenvParser}
 
 
 def get_parser_for_file_path(file_path: str) -> Union[PythonPipenvParser]:

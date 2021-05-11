@@ -1,4 +1,5 @@
 import os
+import sys
 from typing import Any, List
 
 import click
@@ -100,15 +101,35 @@ def _process_dependencies(
     )
 
 
+def _get_file_path(file: str) -> str:
+    ctx = click.get_current_context()
+    if not file:
+        click.echo(ctx.get_help())
+        ctx.exit(1)
+    if os.path.isfile(file):
+        return file
+
+    # Look if exist in github action path
+    if not os.path.isfile(file) and 'GITHUB_WORKSPACE' in os.environ:
+        github_action_path = f"{os.environ['GITHUB_WORKSPACE']}/{file}"
+        if os.path.isfile(github_action_path):
+            return github_action_path
+
+    ctx.fail(f"file {file} not found")
+    ctx.exit(1)
+
+
 @click.command()
 @click.argument(
     "file",
-    type=click.Path(exists=True),
+    type=click.Path(),
     default=lambda: os.environ.get("INPUT_FILE", ""),
 )
 def main(file: str) -> None:
     """Generate report for the state of your dependencies."""
+
     click.secho(f"deps-report v{__version__}", fg="green")
+    file = _get_file_path(file)
     click.secho(f"File is: {file}", fg="yellow")
 
     parser_class = get_parser_for_file_path(file)

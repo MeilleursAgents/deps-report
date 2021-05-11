@@ -1,11 +1,11 @@
 FROM python:3.9-slim
 
 COPY . /app
-WORKDIR /app
 
-RUN pip install --upgrade pip && \
+RUN cd /app && \
+    pip install --upgrade pip && \
     pip install poetry && \
-    poetry config virtualenvs.create true && \
+    poetry config virtualenvs.in-project true && \
     poetry install --no-dev
 
-CMD ["poetry", "run", "deps-report"]
+CMD ["bash", "-c", "cd /app && poetry run deps-report"]
