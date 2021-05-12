@@ -9,11 +9,13 @@ deps-report = "deps_report.main:main"
 
 [tool.poetry.dependencies]
 python = "^3.6"
+beautifulsoup4 = "^4.9.3"
 click = "^7.1.2"
 colorama = "^0.4.4"
-beautifulsoup4 = "^4.9.3"
-requests = "^2.25.1"
 packaging = "^20.9"
+PyGithub = "^1.55"
+pytablewriter = "^0.59.0"
+requests = "^2.25.1"
 tabulate = "^0.8.9"
 
 [tool.poetry.dev-dependencies]
