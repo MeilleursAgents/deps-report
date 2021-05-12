@@ -8,3 +8,6 @@ inputs:
   file:
     description: "The path to the dependencies file (Pipfile.lock...)"
     required: true
+  github_token:
+    description: "Github token to comment on the PR"
+    required: true
