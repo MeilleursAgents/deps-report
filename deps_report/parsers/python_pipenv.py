@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Any, Dict, List
+from typing import Any
 
 from deps_report.models import Dependency, DependencyRepository
 from deps_report.utils.templating import expand_template_string_with_env
@@ -29,7 +29,7 @@ class PythonPipenvParser:
         """Create the parser for the specified Pipfile/Pipfile.lock file."""
         self.file_path = self._get_lock_path(file_path)
 
-    def _get_repositories(self) -> Dict[str, DependencyRepository]:
+    def _get_repositories(self) -> dict[str, DependencyRepository]:
         with open(self.file_path, "r") as lock_file:
             file_content = json.load(lock_file)
 
@@ -48,9 +48,9 @@ class PythonPipenvParser:
 
     def _get_repositories_for_dependency(
         self,
-        all_repositories: Dict[str, DependencyRepository],
-        dependency_dict: Dict[str, Any],
-    ) -> List[DependencyRepository]:
+        all_repositories: dict[str, DependencyRepository],
+        dependency_dict: dict[str, Any],
+    ) -> list[DependencyRepository]:
         # Check if repository specified in lockfile
         # if it's the case return list with this repo first,
         # but still include other as sometimes the explicit repository
@@ -67,7 +67,7 @@ class PythonPipenvParser:
             if item.url != self.DEFAULT_REPOSITORY.url
         ]
 
-    def get_dependencies(self) -> List[Dependency]:
+    def get_dependencies(self) -> list[Dependency]:
         """Parse the Pipfile.lock file to return a list of the dependencies."""
         with open(self.file_path, "r") as lock_file:
             file_content = json.load(lock_file)

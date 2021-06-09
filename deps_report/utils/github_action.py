@@ -2,9 +2,12 @@ import json
 import os
 
 from github import Github
+from pytablewriter import MarkdownTableWriter
+
+from deps_report.models.results import ErrorResult, VersionResult, VulnerabilityResult
 
 
-def get_latest_commit_hash_of_pr() -> str:
+def _get_latest_commit_hash_of_pr() -> str:
     """Get commit hash of the latest commit of the current PR."""
     with open(os.environ["GITHUB_EVENT_PATH"], "r") as f:
         gh_event = json.load(f)
@@ -12,7 +15,7 @@ def get_latest_commit_hash_of_pr() -> str:
     return gh_event["pull_request"]["head"]["sha"]
 
 
-def post_github_pr_comment(msg: str) -> None:
+def _post_github_pr_comment(msg: str) -> None:
     """Post or update comment on Github PR corresponding to current event."""
     with open(os.environ["GITHUB_EVENT_PATH"], "r") as f:
         gh_event = json.load(f)
@@ -31,3 +34,44 @@ def post_github_pr_comment(msg: str) -> None:
         existing_comment.edit(msg)
     else:
         gh_pr.create_issue_comment(msg)
+
+
+def send_github_pr_comment_with_results(
+    versions_results: list[VersionResult],
+    vulnerabilities_results: list[VulnerabilityResult],
+    errors_results: list[ErrorResult],
+) -> None:
+    """Print results as a comment on the current Github PR."""
+    if "GITHUB_EVENT_PATH" not in os.environ and "INPUT_GITHUB_TOKEN" not in os.environ:
+        return
+
+    msg = ""
+    if len(vulnerabilities_results) > 0:
+        msg += "## Vulnerable dependencies\n"
+        msg += f"<details><summary> <b>{len(versions_results)}</b> dependencies have vulnerabilities 😱</summary>\n\n"
+        writer = MarkdownTableWriter(
+            headers=["Dependency", "Advisory", "Versions impacted"],
+            value_matrix=[
+                (item.dependency_name, item.advisory, item.impacted_versions)
+                for item in vulnerabilities_results
+            ],
+        )
+        msg += f"{writer.dumps()}</details>\n"
+
+    msg += "## Outdated dependencies\n"
+    if len(versions_results) > 0:
+        msg += f"<details><summary> <b>{len(versions_results)}</b> outdated dependencies found 😢</summary>\n\n"
+        writer = MarkdownTableWriter(
+            headers=["Dependency", "Installed version", "Latest version"],
+            value_matrix=[
+                (item.dependency_name, item.installed_version, item.latest_version)
+                for item in versions_results
+            ],
+        )
+        msg += f"{writer.dumps()}</details>\n"
+    else:
+        msg += "No outdated dependencies found 🎉\n"
+
+    if msg:
+        msg = f"# **deps-report 🔍**\nCommit scanned: {_get_latest_commit_hash_of_pr()[:7]}\n{msg}"
+        _post_github_pr_comment(msg)
