@@ -11,8 +11,12 @@ If run as a Github action on PRs, it will comment on the PR to display the resul
 
 ### Locally
 
-Run the tool with the file specified as a path:
-`deps-report Pipfile.lock`
+The tool has been tested on Python 3.9. If it is not available on your OS you can use [pyenv](https://github.com/pyenv/pyenv).
+
+You need to install [poetry](https://python-poetry.org/) to install the projects dependency with `poetry install`.
+
+Then you can run the tool with the file specified as a path:
+`poetry run deps-report Pipfile.lock`.
 
 ### As a Github Action
 
