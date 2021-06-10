@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 import requests
 from bs4 import BeautifulSoup
@@ -19,7 +18,7 @@ class PythonVersionChecker:
         version_with_extension = filename.split("-")[-1]
         return version_with_extension.replace(".zip", "").replace(".tar.gz", "")
 
-    def _get_filenames_from_simple_page(self, page_text: str) -> List[str]:
+    def _get_filenames_from_simple_page(self, page_text: str) -> list[str]:
         soup = BeautifulSoup(page_text, features="html.parser")
         filenames = [item.text for item in soup.find_all("a")]
         filenames.reverse()
