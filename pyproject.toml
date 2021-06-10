@@ -14,7 +14,6 @@ click = "^8"
 colorama = "^0.4.4"
 packaging = "^20.9"
 PyGithub = "^1.55"
-pytablewriter = "^0.60.0"
 requests = "^2.25.1"
 tabulate = "^0.8.9"
 

@@ -14,16 +14,17 @@ def print_results_stdout(
     vulnerabilities_headers = ["Dependency", "Advisory", "Versions impacted"]
     errors_headers = ["Dependency", "Error"]
 
-    if len(errors_results) > 0:
-        click.secho(
-            f"\nErrors while processing {len(errors_results)} dependencies:", fg="red"
-        )
-        errors_table = tabulate(
-            [(item.dependency_name, item.error) for item in errors_results],
-            errors_headers,
+    if len(vulnerabilities_results) > 0:
+        click.secho("\nVulnerabilities found:", fg="red")
+        vulnerabilities_table = tabulate(
+            [
+                (item.dependency_name, item.advisory, item.impacted_versions)
+                for item in vulnerabilities_results
+            ],
+            vulnerabilities_headers,
             tablefmt="plain",
         )
-        click.echo(errors_table)
+        click.echo(vulnerabilities_table)
 
     if len(versions_results) > 0:
         click.secho("\nOutdated dependencies found:", fg="red")
@@ -39,14 +40,13 @@ def print_results_stdout(
     else:
         click.secho("\nNo outdated dependencies found 🎉", fg="green")
 
-    if len(vulnerabilities_results) > 0:
-        click.secho("\nVulnerabilities found:", fg="red")
-        vulnerabilities_table = tabulate(
-            [
-                (item.dependency_name, item.advisory, item.impacted_versions)
-                for item in vulnerabilities_results
-            ],
-            vulnerabilities_headers,
+    if len(errors_results) > 0:
+        click.secho(
+            f"\nErrors while processing {len(errors_results)} dependencies:", fg="red"
+        )
+        errors_table = tabulate(
+            [(item.dependency_name, item.error) for item in errors_results],
+            errors_headers,
             tablefmt="plain",
         )
-        click.echo(vulnerabilities_table)
+        click.echo(errors_table)
