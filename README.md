@@ -18,7 +18,7 @@ Run the tool with the file specified as a path:
 
 To run as a Github action, you can use the following snippet.
 You just need to adjust the `file` parameter to indicate the path to your lockfile.
-The `GITHUB_TOKEN` secret (provided automatically by Github) is needed to comment on the PR
+The `GITHUB_TOKEN` secret (provided automatically by Github) is needed to comment on the PR.
 ```yaml
 ---
 name: Dependencies report
