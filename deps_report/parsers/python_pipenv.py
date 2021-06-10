@@ -56,7 +56,7 @@ class PythonPipenvParser:
         # but still include other as sometimes the explicit repository
         # is the wrong one
         explicit_repo = dependency_dict.get("index")
-        if explicit_repo:
+        if explicit_repo and explicit_repo in all_repositories:
             return [all_repositories[explicit_repo]] + [
                 item for item in all_repositories.values() if item.name != explicit_repo
             ]
