@@ -48,7 +48,7 @@ def send_github_pr_comment_with_results(
     msg = ""
     if len(vulnerabilities_results) > 0:
         msg += "## Vulnerable dependencies\n"
-        msg += f"<details><summary> <b>{len(versions_results)}</b> dependencies have vulnerabilities 😱</summary>\n\n"
+        msg += f"<details><summary> <b>{len(vulnerabilities_results)}</b> dependencies have vulnerabilities 😱</summary>\n\n"
         writer = MarkdownTableWriter(
             headers=["Dependency", "Advisory", "Versions impacted"],
             value_matrix=[
@@ -56,7 +56,7 @@ def send_github_pr_comment_with_results(
                 for item in vulnerabilities_results
             ],
         )
-        msg += f"{writer.dumps()}</details>\n"
+        msg += f"{writer.dumps()}</details>\n\n"
 
     msg += "## Outdated dependencies\n"
     if len(versions_results) > 0:
@@ -68,7 +68,7 @@ def send_github_pr_comment_with_results(
                 for item in versions_results
             ],
         )
-        msg += f"{writer.dumps()}</details>\n"
+        msg += f"{writer.dumps()}</details>\n\n"
     else:
         msg += "No outdated dependencies found 🎉\n"
 
