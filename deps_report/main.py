@@ -96,7 +96,6 @@ def _get_file_path(file: str) -> str:
             return github_action_path
 
     ctx.fail(f"file {file} not found")
-    ctx.exit(1)
 
 
 @click.command()
