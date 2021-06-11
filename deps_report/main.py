@@ -20,15 +20,13 @@ from deps_report.vulnerabilities_checkers import get_vulnerability_checker_for_p
 async def _process_dependency(
     version_checker: Any, vulnerability_checker: Any, dependency: Dependency
 ) -> tuple[Optional[VersionResult], Optional[VulnerabilityResult], list[ErrorResult]]:
-    await asyncio.sleep(0.001)
-
     errors_results = []
     version_result = None
     vulnerability_result = None
 
     try:
         latest_version = version_parser.parse(
-            version_checker.get_latest_version_of_dependency(dependency)
+            await version_checker.get_latest_version_of_dependency(dependency)
         )
     except VerificationError:
         errors_results.append(

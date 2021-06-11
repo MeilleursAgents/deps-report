@@ -9,6 +9,7 @@ deps-report = "deps_report.main:main"
 
 [tool.poetry.dependencies]
 python = "^3.9"
+aiohttp = "^3.7.4"
 beautifulsoup4 = "^4.9.3"
 click = "^8"
 colorama = "^0.4.4"

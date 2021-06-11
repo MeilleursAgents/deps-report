@@ -1,9 +1,10 @@
 import logging
 
-import requests
+import aiohttp
+from aiohttp.client import ClientSession
+from aiohttp.client_exceptions import ClientError
 from bs4 import BeautifulSoup
 from packaging import version as version_parser
-from requests import HTTPError
 
 from deps_report.models import Dependency, VerificationError
 
@@ -24,15 +25,18 @@ class PythonVersionChecker:
         filenames.reverse()
         return filenames
 
-    def _get_latest_version_from_repository(self, url: str) -> str:
-        simple_page = requests.get(url)
+    async def _get_latest_version_from_repository(
+        self, session: ClientSession, url: str
+    ) -> str:
+        async with session.get(url) as response:
+            if response.status == 404:
+                raise ValueError("Dependency doesn't exist on repository")
 
-        if simple_page.status_code == 404:
-            raise ValueError("Dependency doesn't exist on repository")
+            response.raise_for_status()
 
-        simple_page.raise_for_status()
+            page_content = await response.text()
 
-        for filename in self._get_filenames_from_simple_page(simple_page.text):
+        for filename in self._get_filenames_from_simple_page(page_content):
             if filename.endswith((".egg", ".whl")):
                 version = self._get_version_from_wheel_filename(filename)
             elif filename.endswith((".tar.gz", ".zip")):
@@ -50,17 +54,20 @@ class PythonVersionChecker:
 
         raise ValueError(f"Cannot check version for {url}")
 
-    def get_latest_version_of_dependency(self, dependency: Dependency) -> str:
+    async def get_latest_version_of_dependency(self, dependency: Dependency) -> str:
         """Get the latest version available of a specified dependency."""
-        for repository in dependency.repositories:
-            url = f"{repository.url}/{dependency.name}"
-            try:
-                version = self._get_latest_version_from_repository(url)
-            except ValueError:
-                continue
-            except HTTPError:
-                logger.info("Error while fetching repository informations")
-            else:
-                return version
+        async with aiohttp.ClientSession() as session:
+            for repository in dependency.repositories:
+                url = f"{repository.url}/{dependency.name}"
+                try:
+                    version = await self._get_latest_version_from_repository(
+                        session, url
+                    )
+                except ValueError:
+                    continue
+                except ClientError:
+                    logger.info("Error while fetching repository informations")
+                else:
+                    return version
 
         raise VerificationError(f"Cannot check version for {dependency.name}")
