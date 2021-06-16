@@ -41,9 +41,7 @@ def print_results_stdout(
         click.secho("\nNo outdated dependencies found 🎉", fg="green")
 
     if len(errors_results) > 0:
-        click.secho(
-            f"\nErrors while processing {len(errors_results)} dependencies:", fg="red"
-        )
+        click.secho(f"\n{len(errors_results)} errors:", fg="red")
         errors_table = tabulate(
             [(item.dependency_name, item.error) for item in errors_results],
             errors_headers,
