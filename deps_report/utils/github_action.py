@@ -57,7 +57,7 @@ def send_github_pr_comment_with_results(
             ["Dependency", "Advisory", "Versions impacted"],
             tablefmt="github",
         )
-        msg += f"{vulnerabilities_table}</details>\n\n"
+        msg += f"{vulnerabilities_table}\n</details>\n\n"
 
     msg += "## Outdated dependencies\n"
     if len(versions_results) > 0:
@@ -70,7 +70,7 @@ def send_github_pr_comment_with_results(
             ["Dependency", "Installed version", "Latest version"],
             tablefmt="github",
         )
-        msg += f"{versions_table}</details>\n\n"
+        msg += f"{versions_table}\n</details>\n\n"
     else:
         msg += "No outdated dependencies found 🎉\n"
 

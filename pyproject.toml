@@ -15,7 +15,6 @@ click = "^8"
 colorama = "^0.4.4"
 packaging = "^20.9"
 PyGithub = "^1.55"
-requests = "^2.25.1"
 tabulate = "^0.8.9"
 
 [tool.poetry.dev-dependencies]
@@ -27,7 +26,6 @@ mypy = "^0.900"
 pdbpp = "^0.10.2"
 pyproject-flake8 = "^0.0.1a2"
 pytest = "^6"
-types-requests = "*"
 types-tabulate = "*"
 
 [tool.mypy]

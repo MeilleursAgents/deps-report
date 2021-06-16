@@ -2,7 +2,7 @@ import logging
 
 import aiohttp
 from aiohttp.client import ClientSession
-from aiohttp.client_exceptions import ClientError
+from aiohttp.client_exceptions import ClientConnectionError, ClientError
 from bs4 import BeautifulSoup
 from packaging import version as version_parser
 
@@ -65,7 +65,7 @@ class PythonVersionChecker:
                     )
                 except ValueError:
                     continue
-                except ClientError:
+                except (ClientConnectionError, ClientError):
                     logger.info("Error while fetching repository informations")
                 else:
                     return version

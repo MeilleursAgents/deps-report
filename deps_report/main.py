@@ -128,6 +128,8 @@ async def main(file: str) -> None:
     click.secho(f"Found {len(dependencies)} dependencies\n", fg="yellow")
 
     version_checker = get_version_checker_for_parser(type(parser_class))
-    vulnerability_checker = get_vulnerability_checker_for_parser(type(parser_class))
+    vulnerability_checker = await get_vulnerability_checker_for_parser(
+        type(parser_class)
+    )
 
     await _process_dependencies(dependencies, version_checker, vulnerability_checker)
