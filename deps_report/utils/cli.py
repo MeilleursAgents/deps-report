@@ -18,7 +18,7 @@ def print_results_stdout(
         click.secho("\nVulnerabilities found:", fg="red")
         vulnerabilities_table = tabulate(
             [
-                (item.dependency_name, item.advisory, item.impacted_versions)
+                (item.dependency.name, item.advisory, item.impacted_versions)
                 for item in vulnerabilities_results
             ],
             vulnerabilities_headers,
@@ -30,7 +30,7 @@ def print_results_stdout(
         click.secho("\nOutdated dependencies found:", fg="red")
         versions_table = tabulate(
             [
-                (item.dependency_name, item.installed_version, item.latest_version)
+                (item.dependency.name, item.installed_version, item.latest_version)
                 for item in versions_results
             ],
             versions_headers,
@@ -43,7 +43,7 @@ def print_results_stdout(
     if len(errors_results) > 0:
         click.secho(f"\n{len(errors_results)} errors:", fg="red")
         errors_table = tabulate(
-            [(item.dependency_name, item.error) for item in errors_results],
+            [(item.dependency.name, item.error) for item in errors_results],
             errors_headers,
             tablefmt="plain",
         )

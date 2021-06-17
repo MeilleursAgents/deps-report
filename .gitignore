@@ -122,6 +122,7 @@ dmypy.json
 .vscode/
 
 # pipenv
-# We use poetry so ignore Pipfile.lock
+# We use poetry so ignore pipenv files
 # as we may have files laying around from tests
 Pipfile.lock
+Pipfile

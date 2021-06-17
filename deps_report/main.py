@@ -31,7 +31,7 @@ async def _process_dependency(
     except VerificationError:
         errors_results.append(
             ErrorResult(
-                dependency_name=dependency.name,
+                dependency=dependency,
                 error="Could not fetch latest version",
             )
         )
@@ -40,7 +40,7 @@ async def _process_dependency(
     current_version = version_parser.parse(dependency.version)
     if current_version < latest_version:
         version_result = VersionResult(
-            dependency_name=dependency.name,
+            dependency=dependency,
             installed_version=str(current_version),
             latest_version=str(latest_version),
         )
@@ -51,14 +51,14 @@ async def _process_dependency(
     except VerificationError:
         errors_results.append(
             ErrorResult(
-                dependency_name=dependency.name,
+                dependency=dependency,
                 error="Could not check for vulnerability status",
             )
         )
     else:
         if vulnerability:
             vulnerability_result = VulnerabilityResult(
-                dependency_name=dependency.name,
+                dependency=dependency,
                 advisory=vulnerability.advisory,
                 impacted_versions=vulnerability.versions_impacted,
             )

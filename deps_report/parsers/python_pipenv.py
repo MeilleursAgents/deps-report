@@ -13,24 +13,21 @@ class PythonPipenvParser:
         url="https://pypi.org/simple",
     )
 
-    def _get_lock_path(self, given_file_path: str) -> str:
-        path, filename = os.path.split(given_file_path)
+    def _get_file_paths(self, given_file_path: str) -> tuple[str, str]:
+        """ Get a tuple containing the file path for Pipfile and the file path for Pipfile.lock."""
+        given_path, given_filename = os.path.split(given_file_path)
 
-        if filename == "Pipfile.lock":
-            return given_file_path
+        if given_filename == "Pipfile.lock":
+            return os.path.join(given_path, "Pipfile"), given_file_path
+        elif given_filename == "Pipfile":
+            return given_file_path, os.path.join(given_path, "Pipfile.lock"),
 
-        filename = os.path.splitext(filename)[0]
-        new_filename = "ok_%s.txt" % filename
-        new_path = os.path.join(path, new_filename)
-
-        return new_path
-
-    def __init__(self, file_path: str) -> None:
-        """Create the parser for the specified Pipfile/Pipfile.lock file."""
-        self.file_path = self._get_lock_path(file_path)
+    def __init__(self, given_file_path: str) -> None:
+        """Create the parser for the given Pipfile/Pipfile.lock file path."""
+        self.pipenv_file_path, self.pipenv_lock_file_path = self._get_file_paths(given_file_path)
 
     def _get_repositories(self) -> dict[str, DependencyRepository]:
-        with open(self.file_path, "r") as lock_file:
+        with open(self.pipenv_lock_file_path, "r") as lock_file:
             file_content = json.load(lock_file)
 
         parsed_repositories = {}
@@ -69,7 +66,7 @@ class PythonPipenvParser:
 
     def get_dependencies(self) -> list[Dependency]:
         """Parse the Pipfile.lock file to return a list of the dependencies."""
-        with open(self.file_path, "r") as lock_file:
+        with open(self.pipenv_lock_file_path, "r") as lock_file:
             file_content = json.load(lock_file)
 
         repositories = self._get_repositories()

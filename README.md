@@ -1,13 +1,16 @@
 # deps-report
 
-Display a report of the outdated dependencies for a specified lockfile.
+Display a report of the outdated dependencies for a specified project.
 It can be run locally or as Github Action.
 If run as a Github action on PRs, it will comment on the PR to display the results.
 
 ## Supported dependencies formats
-- Pipenv (through the `Pipfile.lock` file)
+
+- Pipenv: use the path to your `Pipfile.lock` or `Pipfile`. Please note that both files need to be present side-by-side, but it should always be the case in a valid pipenv project.
 
 ## Usage
+
+deps-report doesn't need to be in the app environment. It works by parsing the lockfiles only.
 
 ### Locally
 

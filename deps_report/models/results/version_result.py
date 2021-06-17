@@ -1,8 +1,9 @@
 from dataclasses import dataclass
+from deps_report.models.dependency import Dependency
 
 
 @dataclass
 class VersionResult:
-    dependency_name: str
+    dependency: Dependency
     installed_version: str
     latest_version: str

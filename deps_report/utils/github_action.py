@@ -51,7 +51,7 @@ def send_github_pr_comment_with_results(
         msg += f"<details><summary> <b>{len(vulnerabilities_results)}</b> dependencies have vulnerabilities 😱</summary>\n\n"
         vulnerabilities_table = tabulate(
             [
-                (item.dependency_name, item.advisory, item.impacted_versions)
+                (item.dependency.name, item.advisory, item.impacted_versions)
                 for item in vulnerabilities_results
             ],
             ["Dependency", "Advisory", "Versions impacted"],
@@ -64,7 +64,7 @@ def send_github_pr_comment_with_results(
         msg += f"<details><summary> <b>{len(versions_results)}</b> outdated dependencies found 😢</summary>\n\n"
         versions_table = tabulate(
             [
-                (item.dependency_name, item.installed_version, item.latest_version)
+                (item.dependency.name, item.installed_version, item.latest_version)
                 for item in versions_results
             ],
             ["Dependency", "Installed version", "Latest version"],
@@ -72,7 +72,7 @@ def send_github_pr_comment_with_results(
         )
         msg += f"{versions_table}\n</details>\n\n"
     else:
-        msg += "No outdated dependencies found 🎉\n"
+        msg += "No outdated dependencies found 🎉\n\n"
 
     if msg:
         msg = f"# **deps-report 🔍**\nCommit scanned: {_get_latest_commit_hash_of_pr()[:7]}\n{msg}"
