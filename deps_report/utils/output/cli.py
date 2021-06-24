@@ -2,6 +2,7 @@ import click
 from tabulate import tabulate
 
 from deps_report.models.results import ErrorResult, VersionResult, VulnerabilityResult
+from deps_report.utils.output.common import get_display_output_for_dependency
 
 
 def print_results_stdout(
@@ -18,7 +19,11 @@ def print_results_stdout(
         click.secho("\nVulnerabilities found:", fg="red")
         vulnerabilities_table = tabulate(
             [
-                (item.dependency.name, item.advisory, item.impacted_versions)
+                (
+                    get_display_output_for_dependency(item.dependency),
+                    item.advisory,
+                    item.impacted_versions,
+                )
                 for item in vulnerabilities_results
             ],
             vulnerabilities_headers,
@@ -30,7 +35,11 @@ def print_results_stdout(
         click.secho("\nOutdated dependencies found:", fg="red")
         versions_table = tabulate(
             [
-                (item.dependency.name, item.installed_version, item.latest_version)
+                (
+                    get_display_output_for_dependency(item.dependency),
+                    item.installed_version,
+                    item.latest_version,
+                )
                 for item in versions_results
             ],
             versions_headers,
@@ -43,7 +52,10 @@ def print_results_stdout(
     if len(errors_results) > 0:
         click.secho(f"\n{len(errors_results)} errors:", fg="red")
         errors_table = tabulate(
-            [(item.dependency.name, item.error) for item in errors_results],
+            [
+                (get_display_output_for_dependency(item.dependency), item.error)
+                for item in errors_results
+            ],
             errors_headers,
             tablefmt="plain",
         )

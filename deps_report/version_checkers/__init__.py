@@ -3,10 +3,6 @@ from typing import Type, Union
 from deps_report.parsers import PythonPipenvParser
 from deps_report.version_checkers.python import PythonVersionChecker
 
-__all__ = [
-    PythonVersionChecker.__name__,
-]
-
 VERSION_CHECKER_RULES = {PythonPipenvParser: PythonVersionChecker}
 
 

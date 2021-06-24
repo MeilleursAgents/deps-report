@@ -11,8 +11,8 @@ from deps_report.models import Dependency, VerificationError
 from deps_report.models.results import ErrorResult, VersionResult, VulnerabilityResult
 from deps_report.parsers import get_parser_for_file_path
 from deps_report.utils.asynchronous import coroutine
-from deps_report.utils.cli import print_results_stdout
-from deps_report.utils.github_action import send_github_pr_comment_with_results
+from deps_report.utils.output.cli import print_results_stdout
+from deps_report.utils.output.github_action import send_github_pr_comment_with_results
 from deps_report.version_checkers import get_version_checker_for_parser
 from deps_report.vulnerabilities_checkers import get_vulnerability_checker_for_parser
 

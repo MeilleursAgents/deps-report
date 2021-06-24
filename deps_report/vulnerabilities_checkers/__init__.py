@@ -3,10 +3,6 @@ from typing import Type, Union
 from deps_report.parsers import PythonPipenvParser
 from deps_report.vulnerabilities_checkers.python import PythonVulnerabilityChecker
 
-__all__ = [
-    PythonVulnerabilityChecker.__name__,
-]
-
 VULNERABILITY_CHECKER_RULES = {PythonPipenvParser: PythonVulnerabilityChecker}
 
 

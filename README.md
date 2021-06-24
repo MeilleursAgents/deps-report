@@ -6,7 +6,21 @@ If run as a Github action on PRs, it will comment on the PR to display the resul
 
 ## Supported dependencies formats
 
-- Pipenv: use the path to your `Pipfile.lock` or `Pipfile`. Please note that both files need to be present side-by-side, but it should always be the case in a valid pipenv project.
+### Pipenv
+
+Use the path to your `Pipfile.lock` or `Pipfile`. Please note that both files need to be present side-by-side, but it should always be the case in a valid pipenv project.
+
+The tool supports fetching dependencies from all repositories implementing [PEP 503 (Simple Repository API)](https://www.python.org/dev/peps/pep-0503/) and has been tested with pypi and [packagecloud](https://packagecloud.io/).
+
+If your repository URL contains a templated URL (for example a token for a private repository), it will be automatically expanded if the variable is set in the environment:
+```
+...
+[[source]]
+name = "ma"
+url = "https://${MY_REPO_TOKEN}:@packagecloud.io/my_org/my_repo/pypi/simple"
+verify_ssl = true
+...
+```
 
 ## Usage
 
@@ -42,6 +56,8 @@ jobs:
         with:
           file: Pipfile.lock
           github_token: ${{ secrets.GITHUB_TOKEN }}
+        #env:
+        #  MY_REPO_TOKEN: ${{ secrets.MY_REPO_TOKEN }}  # if you need a token for a private repository
 ```
 
 Using a monorepo with multiple apps? You can use the `paths` filter option of Github Actions to limit to your current app:
@@ -64,4 +80,6 @@ jobs:
         with:
           file: apps/MY_APP/Pipfile.lock
           github_token: ${{ secrets.GITHUB_TOKEN }}
+        #env:
+        #  MY_REPO_TOKEN: ${{ secrets.MY_REPO_TOKEN }}  # if you need a token for a private repository
 ```

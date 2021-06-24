@@ -28,6 +28,7 @@ pdbpp = "^0.10.2"
 pyproject-flake8 = "^0.0.1a2"
 pytest = "^6"
 types-tabulate = "*"
+types-toml = "*"
 
 [tool.mypy]
 ignore_missing_imports = true
@@ -40,6 +41,7 @@ multi_line_output = 3
 [tool.flake8]
 max_line_length = 88
 extend-ignore = "D100,D101,D104,E501"
+per-file-ignores = "__init__.py:F401"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
