@@ -5,6 +5,29 @@ from github import Github
 from tabulate import tabulate
 
 from deps_report.models.results import ErrorResult, VersionResult, VulnerabilityResult
+from deps_report.utils.output.common import get_display_output_for_dependency
+
+
+def _get_workflow_run_url() -> str:
+    return f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}"
+
+
+def _is_running_as_github_action() -> bool:
+    return "GITHUB_EVENT_PATH" in os.environ and (
+        "INPUT_GITHUB_TOKEN" in os.environ or "GITHUB_TOKEN" in os.environ
+    )
+
+
+def _get_github_token() -> str:
+    token_as_input = os.environ.get("INPUT_GITHUB_TOKEN")
+    if token_as_input:
+        return token_as_input
+
+    token_as_env = os.environ.get("GITHUB_TOKEN")
+    if token_as_env:
+        return token_as_env
+
+    raise ValueError("Doesn't have Github token")
 
 
 def _get_latest_commit_hash_of_pr() -> str:
@@ -20,7 +43,7 @@ def _post_github_pr_comment(msg: str) -> None:
     with open(os.environ["GITHUB_EVENT_PATH"], "r") as f:
         gh_event = json.load(f)
 
-    github = Github(os.environ["INPUT_GITHUB_TOKEN"])
+    github = Github(_get_github_token())
     gh_repo = github.get_repo(gh_event["repository"]["full_name"])
     gh_pr = gh_repo.get_pull(gh_event["number"])
 
@@ -42,7 +65,7 @@ def send_github_pr_comment_with_results(
     errors_results: list[ErrorResult],
 ) -> None:
     """Print results as a comment on the current Github PR."""
-    if "GITHUB_EVENT_PATH" not in os.environ and "INPUT_GITHUB_TOKEN" not in os.environ:
+    if not _is_running_as_github_action():
         return
 
     msg = ""
@@ -51,7 +74,11 @@ def send_github_pr_comment_with_results(
         msg += f"<details><summary> <b>{len(vulnerabilities_results)}</b> dependencies have vulnerabilities 😱</summary>\n\n"
         vulnerabilities_table = tabulate(
             [
-                (item.dependency_name, item.advisory, item.impacted_versions)
+                (
+                    get_display_output_for_dependency(item.dependency),
+                    item.advisory,
+                    item.impacted_versions,
+                )
                 for item in vulnerabilities_results
             ],
             ["Dependency", "Advisory", "Versions impacted"],
@@ -64,7 +91,11 @@ def send_github_pr_comment_with_results(
         msg += f"<details><summary> <b>{len(versions_results)}</b> outdated dependencies found 😢</summary>\n\n"
         versions_table = tabulate(
             [
-                (item.dependency_name, item.installed_version, item.latest_version)
+                (
+                    get_display_output_for_dependency(item.dependency),
+                    item.installed_version,
+                    item.latest_version,
+                )
                 for item in versions_results
             ],
             ["Dependency", "Installed version", "Latest version"],
@@ -72,8 +103,9 @@ def send_github_pr_comment_with_results(
         )
         msg += f"{versions_table}\n</details>\n\n"
     else:
-        msg += "No outdated dependencies found 🎉\n"
+        msg += "No outdated dependencies found 🎉\n\n"
 
+    footer = f"<sub>[*Logs*]({_get_workflow_run_url()})</sub>"
     if msg:
-        msg = f"# **deps-report 🔍**\nCommit scanned: {_get_latest_commit_hash_of_pr()[:7]}\n{msg}"
+        msg = f"# **deps-report 🔍**\nCommit scanned: {_get_latest_commit_hash_of_pr()[:7]}\n{msg}\n\n{footer}"
         _post_github_pr_comment(msg)

@@ -11,8 +11,8 @@ from deps_report.models import Dependency, VerificationError
 from deps_report.models.results import ErrorResult, VersionResult, VulnerabilityResult
 from deps_report.parsers import get_parser_for_file_path
 from deps_report.utils.asynchronous import coroutine
-from deps_report.utils.cli import print_results_stdout
-from deps_report.utils.github_action import send_github_pr_comment_with_results
+from deps_report.utils.output.cli import print_results_stdout
+from deps_report.utils.output.github_action import send_github_pr_comment_with_results
 from deps_report.version_checkers import get_version_checker_for_parser
 from deps_report.vulnerabilities_checkers import get_vulnerability_checker_for_parser
 
@@ -31,7 +31,7 @@ async def _process_dependency(
     except VerificationError:
         errors_results.append(
             ErrorResult(
-                dependency_name=dependency.name,
+                dependency=dependency,
                 error="Could not fetch latest version",
             )
         )
@@ -40,7 +40,7 @@ async def _process_dependency(
     current_version = version_parser.parse(dependency.version)
     if current_version < latest_version:
         version_result = VersionResult(
-            dependency_name=dependency.name,
+            dependency=dependency,
             installed_version=str(current_version),
             latest_version=str(latest_version),
         )
@@ -51,14 +51,14 @@ async def _process_dependency(
     except VerificationError:
         errors_results.append(
             ErrorResult(
-                dependency_name=dependency.name,
+                dependency=dependency,
                 error="Could not check for vulnerability status",
             )
         )
     else:
         if vulnerability:
             vulnerability_result = VulnerabilityResult(
-                dependency_name=dependency.name,
+                dependency=dependency,
                 advisory=vulnerability.advisory,
                 impacted_versions=vulnerability.versions_impacted,
             )

@@ -3,10 +3,6 @@ from typing import Union
 
 from deps_report.parsers.python_pipenv import PythonPipenvParser
 
-__all__ = [
-    PythonPipenvParser.__name__,
-]
-
 PARSERS_RULES = {r".*Pipfile(.lock)?$": PythonPipenvParser}
 
 
