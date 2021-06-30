@@ -22,6 +22,12 @@ verify_ssl = true
 ...
 ```
 
+### Poetry
+
+Use the path to your `poetry.lock` or `pyproject.toml` file. Please note that both files need to be present side-by-side, but it should always be the case in a valid poetry project.
+
+⚠️ The Poetry format only support PyPI dependencies for now. Other sources are not supported.
+
 ## Usage
 
 deps-report doesn't need to be in the app environment. It works by parsing the lockfiles only.

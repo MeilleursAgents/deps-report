@@ -36,13 +36,14 @@ class PythonVersionChecker:
 
             page_content = await response.text()
 
+        # Parse all filenames as version
+        versions = []
+        all_are_prerelease = True
         for filename in self._get_filenames_from_simple_page(page_content):
             if filename.endswith((".egg", ".whl")):
                 version = self._get_version_from_wheel_filename(filename)
-            elif filename.endswith((".tar.gz", ".zip")):
-                version = self._get_version_from_source_filename(filename)
             else:
-                raise NotImplementedError(f"Cannot check version for {filename}")
+                version = self._get_version_from_source_filename(filename)
 
             try:
                 parsed_version = version_parser.parse(version)
@@ -50,7 +51,17 @@ class PythonVersionChecker:
                 continue
 
             if not parsed_version.is_prerelease:
-                return version
+                all_are_prerelease = False
+
+            versions.append(parsed_version)
+
+        # If all prerelease get latest one
+        if all_are_prerelease and len(versions) != 0:
+            return str(versions[0])
+
+        for dep_version in versions:
+            if not dep_version.is_prerelease:
+                return str(dep_version)
 
         raise ValueError(f"Cannot check version for {url}")
 
