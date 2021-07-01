@@ -1,9 +1,13 @@
 from typing import Type, Union
 
 from deps_report.parsers import PythonPipenvParser
+from deps_report.parsers.python.poetry import PythonPoetryParser
 from deps_report.version_checkers.python import PythonVersionChecker
 
-VERSION_CHECKER_RULES = {PythonPipenvParser: PythonVersionChecker}
+VERSION_CHECKER_RULES = {
+    PythonPipenvParser: PythonVersionChecker,
+    PythonPoetryParser: PythonVersionChecker,
+}
 
 
 def get_version_checker_for_parser(parser: Type) -> Union[PythonVersionChecker]:

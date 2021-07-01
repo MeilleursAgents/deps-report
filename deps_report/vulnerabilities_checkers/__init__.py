@@ -1,9 +1,13 @@
 from typing import Type, Union
 
 from deps_report.parsers import PythonPipenvParser
+from deps_report.parsers.python.poetry import PythonPoetryParser
 from deps_report.vulnerabilities_checkers.python import PythonVulnerabilityChecker
 
-VULNERABILITY_CHECKER_RULES = {PythonPipenvParser: PythonVulnerabilityChecker}
+VULNERABILITY_CHECKER_RULES = {
+    PythonPipenvParser: PythonVulnerabilityChecker,
+    PythonPoetryParser: PythonVulnerabilityChecker,
+}
 
 
 async def get_vulnerability_checker_for_parser(

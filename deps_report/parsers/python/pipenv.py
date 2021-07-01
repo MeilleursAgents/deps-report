@@ -5,16 +5,11 @@ from typing import Any
 import toml
 
 from deps_report.models import Dependency, DependencyRepository
+from deps_report.parsers.python.common import DEFAULT_REPOSITORY
 from deps_report.utils.templating import expand_template_string_with_env
 
 
 class PythonPipenvParser:
-
-    DEFAULT_REPOSITORY = DependencyRepository(
-        name="pypi",
-        url="https://pypi.org/simple",
-    )
-
     def _get_file_paths(self, given_file_path: str) -> tuple[str, str]:
         """Get a tuple containing the file path for Pipfile and the file path for Pipfile.lock."""
         given_path, given_filename = os.path.split(given_file_path)
@@ -49,8 +44,8 @@ class PythonPipenvParser:
                 url=expand_template_string_with_env(repository["url"]),
             )
 
-        if self.DEFAULT_REPOSITORY.name not in parsed_repositories:
-            parsed_repositories[self.DEFAULT_REPOSITORY.name] = self.DEFAULT_REPOSITORY
+        if DEFAULT_REPOSITORY.name not in parsed_repositories:
+            parsed_repositories[DEFAULT_REPOSITORY.name] = DEFAULT_REPOSITORY
 
         return parsed_repositories
 
@@ -69,10 +64,10 @@ class PythonPipenvParser:
                 item for item in all_repositories.values() if item.name != explicit_repo
             ]
 
-        return [self.DEFAULT_REPOSITORY] + [
+        return [DEFAULT_REPOSITORY] + [
             item
             for item in all_repositories.values()
-            if item.url != self.DEFAULT_REPOSITORY.url
+            if item.url != DEFAULT_REPOSITORY.url
         ]
 
     def _is_transitive_dependency(
