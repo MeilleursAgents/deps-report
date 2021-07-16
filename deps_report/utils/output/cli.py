@@ -16,7 +16,7 @@ def print_results_stdout(
     errors_headers = ["Dependency", "Error"]
 
     if len(vulnerabilities_results) > 0:
-        click.secho("\nVulnerabilities found:", fg="red")
+        click.secho(f"\n{len(vulnerabilities_results)} vulnerable dependencies found:", fg="red")
         vulnerabilities_table = tabulate(
             [
                 (
@@ -32,7 +32,7 @@ def print_results_stdout(
         click.echo(vulnerabilities_table)
 
     if len(versions_results) > 0:
-        click.secho("\nOutdated dependencies found:", fg="red")
+        click.secho(f"\n{len(versions_results)} outdated dependencies found:", fg="red")
         versions_table = tabulate(
             [
                 (
