@@ -5,7 +5,10 @@ from github import Github
 from tabulate import tabulate
 
 from deps_report.models.results import ErrorResult, VersionResult, VulnerabilityResult
-from deps_report.utils.output.common import get_display_output_for_dependency
+from deps_report.utils.output.common import (
+    get_display_output_for_dependency,
+    get_number_of_dependencies_with_outdated_major,
+)
 
 
 def _get_workflow_run_url() -> str:
@@ -88,7 +91,10 @@ def send_github_pr_comment_with_results(
 
     msg += "## Outdated dependencies\n"
     if len(versions_results) > 0:
-        msg += f"<details><summary> <b>{len(versions_results)}</b> outdated dependencies found 😢</summary>\n\n"
+        outdated_major_count = get_number_of_dependencies_with_outdated_major(
+            versions_results
+        )
+        msg += f"<details><summary> <b>{len(versions_results)}</b> outdated dependencies found (including {outdated_major_count} outdated major versions)😢</summary>\n\n"
         versions_table = tabulate(
             [
                 (

@@ -2,7 +2,10 @@ import click
 from tabulate import tabulate
 
 from deps_report.models.results import ErrorResult, VersionResult, VulnerabilityResult
-from deps_report.utils.output.common import get_display_output_for_dependency
+from deps_report.utils.output.common import (
+    get_display_output_for_dependency,
+    get_number_of_dependencies_with_outdated_major,
+)
 
 
 def print_results_stdout(
@@ -16,7 +19,9 @@ def print_results_stdout(
     errors_headers = ["Dependency", "Error"]
 
     if len(vulnerabilities_results) > 0:
-        click.secho(f"\n{len(vulnerabilities_results)} vulnerable dependencies found:", fg="red")
+        click.secho(
+            f"\n{len(vulnerabilities_results)} vulnerable dependencies found:", fg="red"
+        )
         vulnerabilities_table = tabulate(
             [
                 (
@@ -32,7 +37,13 @@ def print_results_stdout(
         click.echo(vulnerabilities_table)
 
     if len(versions_results) > 0:
-        click.secho(f"\n{len(versions_results)} outdated dependencies found:", fg="red")
+        outdated_major_count = get_number_of_dependencies_with_outdated_major(
+            versions_results
+        )
+        click.secho(
+            f"\n{len(versions_results)} outdated dependencies found (including {outdated_major_count} outdated major versions):",
+            fg="red",
+        )
         versions_table = tabulate(
             [
                 (
