@@ -1,73 +1,34 @@
 import asyncio
 import itertools
 import os
-from typing import Any, Optional
 
 import click
-from packaging import version as version_parser
 
 from deps_report import __version__
+from deps_report.dependencies_version_checkers import (
+    get_dependencies_version_checker_for_parser,
+)
+from deps_report.dependencies_version_checkers.base import (
+    DependenciesVersionCheckerBase,
+)
 from deps_report.models import Dependency, VerificationError
 from deps_report.models.results import ErrorResult, VersionResult, VulnerabilityResult
+from deps_report.models.runtime_informations import RuntimeInformations
 from deps_report.parsers import get_parser_for_file_path
+from deps_report.processing import process_dependency
+from deps_report.runtime_version_checkers import get_runtime_version_checker_for_parser
 from deps_report.utils.asynchronous import coroutine
 from deps_report.utils.output.cli import print_results_stdout
 from deps_report.utils.output.github_action import send_github_pr_comment_with_results
-from deps_report.version_checkers import get_version_checker_for_parser
 from deps_report.vulnerabilities_checkers import get_vulnerability_checker_for_parser
+from deps_report.vulnerabilities_checkers.base import VulnerabilityCheckerBase
 
 
-async def _process_dependency(
-    version_checker: Any, vulnerability_checker: Any, dependency: Dependency
-) -> tuple[Optional[VersionResult], Optional[VulnerabilityResult], list[ErrorResult]]:
-    errors_results = []
-    version_result = None
-    vulnerability_result = None
-
-    try:
-        latest_version = version_parser.parse(
-            await version_checker.get_latest_version_of_dependency(dependency)
-        )
-    except VerificationError:
-        errors_results.append(
-            ErrorResult(
-                dependency=dependency,
-                error="Could not fetch latest version",
-            )
-        )
-        return version_result, vulnerability_result, errors_results
-
-    current_version = version_parser.parse(dependency.version)
-    if current_version < latest_version:
-        version_result = VersionResult(
-            dependency=dependency,
-            installed_version=str(current_version),
-            latest_version=str(latest_version),
-        )
-
-    # Check if current version is vulnerable
-    try:
-        vulnerability = vulnerability_checker.check_if_package_is_vulnerable(dependency)
-    except VerificationError:
-        errors_results.append(
-            ErrorResult(
-                dependency=dependency,
-                error="Could not check for vulnerability status",
-            )
-        )
-    else:
-        if vulnerability:
-            vulnerability_result = VulnerabilityResult(
-                dependency=dependency,
-                advisory=vulnerability.advisory,
-                impacted_versions=vulnerability.versions_impacted,
-            )
-
-    return version_result, vulnerability_result, errors_results
-
-
-async def _process_dependencies(
-    dependencies: list[Dependency], version_checker: Any, vulnerability_checker: Any
+async def _process_project(
+    dependencies: list[Dependency],
+    dependencies_version_checker: DependenciesVersionCheckerBase,
+    vulnerability_checker: VulnerabilityCheckerBase,
+    runtimes_informations: RuntimeInformations | None,
 ) -> None:
     versions_results: list[VersionResult] = []
     vulnerabilities_results: list[VulnerabilityResult] = []
@@ -76,19 +37,26 @@ async def _process_dependencies(
     click.echo("Processing dependencies...")
     results = await asyncio.gather(
         *[
-            _process_dependency(version_checker, vulnerability_checker, dependency)
+            process_dependency(
+                dependencies_version_checker, vulnerability_checker, dependency
+            )
             for dependency in dependencies
         ]
     )
 
     versions_results, vulnerabilities_results, errors_results = map(list, zip(*results))  # type: ignore
-    versions_results = list(filter(None, versions_results))
-    vulnerabilities_results = list(filter(None, vulnerabilities_results))
     errors_results = list(itertools.chain(*errors_results))  # type: ignore
 
-    print_results_stdout(versions_results, vulnerabilities_results, errors_results)
+    # Filter empty results
+    versions_results = list(filter(None, versions_results))
+    vulnerabilities_results = list(filter(None, vulnerabilities_results))
+
+    # Print in stdout and send github comment if on Github
+    print_results_stdout(
+        versions_results, vulnerabilities_results, errors_results, runtimes_informations
+    )
     send_github_pr_comment_with_results(
-        versions_results, vulnerabilities_results, errors_results
+        versions_results, vulnerabilities_results, errors_results, runtimes_informations
     )
 
 
@@ -124,12 +92,29 @@ async def main(file: str) -> None:
 
     parser_class = get_parser_for_file_path(file)
     dependencies = parser_class.get_dependencies()
+    runtime_version = parser_class.get_runtime_version()
 
     click.secho(f"Found {len(dependencies)} dependencies\n", fg="yellow")
 
-    version_checker = get_version_checker_for_parser(type(parser_class))
+    dependencies_version_checker = get_dependencies_version_checker_for_parser(
+        type(parser_class)
+    )
     vulnerability_checker = await get_vulnerability_checker_for_parser(
         type(parser_class)
     )
 
-    await _process_dependencies(dependencies, version_checker, vulnerability_checker)
+    runtime_informations: RuntimeInformations | None = None
+    if runtime_version:
+        try:
+            runtime_informations = await get_runtime_version_checker_for_parser(
+                type(parser_class)
+            ).get_runtime_informations(runtime_version)
+        except VerificationError:
+            runtime_informations = None
+
+    await _process_project(
+        dependencies,
+        dependencies_version_checker,
+        vulnerability_checker,
+        runtime_informations,
+    )

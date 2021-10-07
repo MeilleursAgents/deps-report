@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Optional
 
 import aiohttp
 from aiohttp.client_exceptions import ClientConnectionError, ClientError
 from packaging.specifiers import SpecifierSet
 
 from deps_report.models import Dependency, VerificationError, Vulnerability
+from deps_report.vulnerabilities_checkers import VulnerabilityCheckerBase
 
 logger = logging.getLogger(__name__)
 
@@ -18,13 +18,13 @@ DATABASE_URL = (
 )
 
 
-class PythonVulnerabilityChecker:
-    def __init__(self, vulnerabilities_data: Optional[dict]) -> None:
-        """Init the checker instance with the given data."""
+class PythonVulnerabilityChecker(VulnerabilityCheckerBase):
+    def __init__(self, vulnerabilities_data: dict | None) -> None:
+        """Initialize the Python vulnerability checker."""
         self.data = vulnerabilities_data
 
     @classmethod
-    async def create(self) -> PythonVulnerabilityChecker:
+    async def create(cls) -> PythonVulnerabilityChecker:
         """Create the checker instance by fetching the required data."""
         try:
             async with aiohttp.ClientSession() as session:
@@ -32,7 +32,6 @@ class PythonVulnerabilityChecker:
                     response.raise_for_status()
                     data = json.loads(await response.text())
         except (ClientConnectionError, ClientError):
-            breakpoint()
             logger.error(
                 "Cannot download safety-db database, will skip vulnerabilities checking"
             )
@@ -43,7 +42,7 @@ class PythonVulnerabilityChecker:
     def check_if_package_is_vulnerable(
         self,
         dependency: Dependency,
-    ) -> Optional[Vulnerability]:
+    ) -> Vulnerability | None:
         """Check if the specified dependency has a vulnerability reported."""
         if not self.data:
             raise VerificationError(

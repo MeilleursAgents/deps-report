@@ -1,4 +1,5 @@
 from deps_report.models.dependency import Dependency
 from deps_report.models.dependency_repository import DependencyRepository
 from deps_report.models.exceptions import VerificationError
+from deps_report.models.runtime_informations import RuntimeInformations
 from deps_report.models.vulnerability import Vulnerability

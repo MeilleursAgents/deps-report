@@ -4,6 +4,7 @@ import os
 from github import Github
 from tabulate import tabulate
 
+from deps_report.models import RuntimeInformations
 from deps_report.models.results import ErrorResult, VersionResult, VulnerabilityResult
 from deps_report.utils.output.common import (
     get_display_output_for_dependency,
@@ -66,12 +67,19 @@ def send_github_pr_comment_with_results(
     versions_results: list[VersionResult],
     vulnerabilities_results: list[VulnerabilityResult],
     errors_results: list[ErrorResult],
+    runtime_informations: RuntimeInformations | None,
 ) -> None:
     """Print results as a comment on the current Github PR."""
     if not _is_running_as_github_action():
         return
 
     msg = ""
+
+    if runtime_informations and runtime_informations.current_version_is_outdated:
+        msg += f"ℹ️ {runtime_informations.name} version {runtime_informations.current_version} is used by your project but the latest version is {runtime_informations.latest_version}.\n\n"
+        if runtime_informations.current_version_is_eol_soon:
+            msg += "🚨<b>Your {runtime_informations.name} version reaches EOL date on {runtime_informations.current_version_eol_date}, you should upgrade !</b>\n\n"
+
     if len(vulnerabilities_results) > 0:
         msg += "## Vulnerable dependencies\n"
         msg += f"<details><summary> <b>{len(vulnerabilities_results)}</b> dependencies have vulnerabilities 😱</summary>\n\n"
