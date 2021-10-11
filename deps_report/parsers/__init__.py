@@ -1,6 +1,6 @@
 import re
-from typing import Union
 
+from deps_report.parsers.base import ParserBase
 from deps_report.parsers.python.pipenv import PythonPipenvParser
 from deps_report.parsers.python.poetry import PythonPoetryParser
 
@@ -13,7 +13,7 @@ PARSERS_RULES = {
 
 def get_parser_for_file_path(
     file_path: str,
-) -> Union[PythonPipenvParser, PythonPoetryParser]:
+) -> ParserBase:
     """Get the correct dependency parser according to the filename."""
     for rule_regex, parser_class in PARSERS_RULES.items():
         if re.match(rule_regex, file_path):

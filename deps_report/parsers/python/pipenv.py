@@ -5,11 +5,12 @@ from typing import Any
 import toml
 
 from deps_report.models import Dependency, DependencyRepository
+from deps_report.parsers import ParserBase
 from deps_report.parsers.python.common import DEFAULT_REPOSITORY
 from deps_report.utils.templating import expand_template_string_with_env
 
 
-class PythonPipenvParser:
+class PythonPipenvParser(ParserBase):
     def _get_file_paths(self, given_file_path: str) -> tuple[str, str]:
         """Get a tuple containing the file path for Pipfile and the file path for Pipfile.lock."""
         given_path, given_filename = os.path.split(given_file_path)
@@ -130,3 +131,10 @@ class PythonPipenvParser:
 
         parsed_dependencies.sort(key=lambda x: x.name)
         return parsed_dependencies
+
+    def get_runtime_version(self) -> str | None:
+        """Return the runtime version according to the Pipfile file."""
+        with open(self.pipenv_file_path, "r") as pipenv_file:
+            pipenv_file_content = toml.load(pipenv_file)
+
+        return pipenv_file_content["requires"]["python_version"]

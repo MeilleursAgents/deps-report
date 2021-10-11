@@ -1,7 +1,8 @@
-from typing import Type, Union
+from typing import Type
 
 from deps_report.parsers import PythonPipenvParser
 from deps_report.parsers.python.poetry import PythonPoetryParser
+from deps_report.vulnerabilities_checkers.base import VulnerabilityCheckerBase
 from deps_report.vulnerabilities_checkers.python import PythonVulnerabilityChecker
 
 VULNERABILITY_CHECKER_RULES = {
@@ -12,7 +13,7 @@ VULNERABILITY_CHECKER_RULES = {
 
 async def get_vulnerability_checker_for_parser(
     parser: Type,
-) -> Union[PythonVulnerabilityChecker]:
+) -> VulnerabilityCheckerBase:
     """Get the correct vulnerability checker according to dependency parser used."""
     for parser_class, vuln_checker_class in VULNERABILITY_CHECKER_RULES.items():
         if parser == parser_class:

@@ -6,12 +6,13 @@ from aiohttp.client_exceptions import ClientConnectionError, ClientError
 from bs4 import BeautifulSoup
 from packaging import version as version_parser
 
+from deps_report.dependencies_version_checkers import DependenciesVersionCheckerBase
 from deps_report.models import Dependency, VerificationError
 
 logger = logging.getLogger(__name__)
 
 
-class PythonVersionChecker:
+class PythonDependenciesVersionChecker(DependenciesVersionCheckerBase):
     def _get_version_from_wheel_filename(self, filename: str) -> str:
         return filename.split("-")[1]
 

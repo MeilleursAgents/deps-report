@@ -4,13 +4,14 @@ from typing import Any
 import toml
 
 from deps_report.models import Dependency, DependencyRepository
+from deps_report.parsers import ParserBase
 from deps_report.parsers.python.common import DEFAULT_REPOSITORY
 
 
-class PythonPoetryParser:
+class PythonPoetryParser(ParserBase):
     def __init__(self, given_file_path: str) -> None:
         """Create the parser for the given path."""
-        self.poetry_file_path, self.poetry_lock_file_path = self._get_file_paths(
+        self.pyproject_file_path, self.poetry_lock_file_path = self._get_file_paths(
             given_file_path
         )
 
@@ -34,13 +35,14 @@ class PythonPoetryParser:
         return {"pypi": DEFAULT_REPOSITORY}
 
     def _is_transitive_dependency(
-        self, poetry_file_content: Any, dependency_name: str
+        self, pyproject_file_content: Any, dependency_name: str
     ) -> bool:
         """Check if a dependency is transitive by looking if it's present in the Pipfile."""
         return (
-            dependency_name not in poetry_file_content["tool"]["poetry"]["dependencies"]
+            dependency_name
+            not in pyproject_file_content["tool"]["poetry"]["dependencies"]
             and dependency_name
-            not in poetry_file_content["tool"]["poetry"]["dev-dependencies"]
+            not in pyproject_file_content["tool"]["poetry"]["dev-dependencies"]
         )
 
     def get_dependencies(self) -> list[Dependency]:
@@ -48,8 +50,8 @@ class PythonPoetryParser:
         with open(self.poetry_lock_file_path, "r") as lock_file:
             lock_file_content = toml.load(lock_file)
 
-        with open(self.poetry_file_path, "r") as lock_file:
-            poetry_file_content = toml.load(lock_file)
+        with open(self.pyproject_file_path, "r") as pyproject_file_path:
+            pyproject_file_content = toml.load(pyproject_file_path)
 
         repositories = self._get_repositories()
 
@@ -63,9 +65,13 @@ class PythonPoetryParser:
                     for_dev=package["category"] == "dev",
                     repositories=[repositories["pypi"]],
                     transitive=self._is_transitive_dependency(
-                        poetry_file_content, name
+                        pyproject_file_content, name
                     ),
                 )
             )
 
         return dependencies
+
+    def get_runtime_version(self) -> str | None:
+        """Return the runtime version according to the pyproject.toml file."""
+        return None

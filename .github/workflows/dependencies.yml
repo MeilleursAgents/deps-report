@@ -10,5 +10,5 @@ jobs:
       - name: deps-report
         uses: MeilleursAgents/deps-report@master
         with:
-          file: Pipfile.lock
+          file: pyproject.toml
           github_token: ${{ secrets.GITHUB_TOKEN }}

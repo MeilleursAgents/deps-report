@@ -1,6 +1,6 @@
 # deps-report
 
-Display a report of the outdated dependencies for a specified project.
+Display a report of the outdated dependencies for a specified project. It also display if your runtime is using an outdated Python version (for example, if you are using Python 3.5 which is EOL)
 It can be run locally or as Github Action.
 If run as a Github action on PRs, it will comment on the PR to display the results.
 
@@ -26,7 +26,8 @@ verify_ssl = true
 
 Use the path to your `poetry.lock` or `pyproject.toml` file. Please note that both files need to be present side-by-side, but it should always be the case in a valid poetry project.
 
-⚠️ The Poetry format only support PyPI dependencies for now. Other sources are not supported.
+⚠️ When using Poetry files, only PyPI dependencies are supported for now. Other sources are not supported.
+⚠️ When using Poetry files, the Python runtime version will not be checked.
 
 ## Usage
 
@@ -34,7 +35,7 @@ deps-report doesn't need to be in the app environment. It works by parsing the l
 
 ### Locally
 
-The tool has been tested on Python 3.9. If it is not available on your OS you can use [pyenv](https://github.com/pyenv/pyenv).
+The tool has been tested on Python 3.10. If it is not available on your OS you can use [pyenv](https://github.com/pyenv/pyenv).
 
 You need to install [poetry](https://python-poetry.org/) to install the projects dependency with `poetry install`.
 
