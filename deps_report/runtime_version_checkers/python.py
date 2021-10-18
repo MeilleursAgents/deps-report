@@ -45,7 +45,6 @@ class PythonRuntimeVersionChecker(RuntimeVersionCheckerBase):
             raise VerificationError(error_msg)
 
         eol_date: date = parse(current_version_informations["eol"]).date()
-
         return RuntimeInformations(
             name="Python",
             current_version=current_version_informations["cycle"],
@@ -54,5 +53,5 @@ class PythonRuntimeVersionChecker(RuntimeVersionCheckerBase):
             != current_version_informations["cycle"],
             current_version_eol_date=eol_date,
             current_version_is_eol_soon=eol_date
-            <= (date.today() - timedelta(days=30 * 3)),
+            <= (date.today() + timedelta(days=30 * 3)),
         )

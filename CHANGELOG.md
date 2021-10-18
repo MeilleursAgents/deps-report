@@ -1,3 +1,7 @@
+# Version 0.3.1
+
+- Fix wrong EOL runtime warning date calculation
+
 # Version 0.3.0
 
 - Add poetry support
