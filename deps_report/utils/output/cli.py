@@ -30,6 +30,11 @@ def print_results_stdout(
                 f"Your {runtime_informations.name} version reaches EOL date on {runtime_informations.current_version_eol_date}, you should upgrade !",
                 fg="red",
             )
+        elif runtime_informations.current_version_is_eol:
+            click.secho(
+                f"Your {runtime_informations.name} version reached EOL date on {runtime_informations.current_version_eol_date}, you should upgrade !",
+                fg="red",
+            )
 
     if len(vulnerabilities_results) > 0:
         click.secho(
