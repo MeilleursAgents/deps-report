@@ -10,3 +10,4 @@ class RuntimeInformations:
     current_version_is_outdated: bool
     current_version_eol_date: date
     current_version_is_eol_soon: bool
+    current_version_is_eol: bool

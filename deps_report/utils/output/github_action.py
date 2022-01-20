@@ -79,6 +79,8 @@ def send_github_pr_comment_with_results(
         msg += f"ℹ️ {runtime_informations.name} version {runtime_informations.current_version} is used by your project but the latest version is {runtime_informations.latest_version}.\n\n"
         if runtime_informations.current_version_is_eol_soon:
             msg += f"🚨<b>Your {runtime_informations.name} version reaches EOL date on {runtime_informations.current_version_eol_date}, you should upgrade !</b>\n\n"
+        elif runtime_informations.current_version_is_eol:
+            msg += f"🚨<b>Your {runtime_informations.name} version **reached** EOL date on {runtime_informations.current_version_eol_date}, you should upgrade !</b>\n\n"
 
     if len(vulnerabilities_results) > 0:
         msg += "## Vulnerable dependencies\n"
