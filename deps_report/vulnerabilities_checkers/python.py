@@ -59,7 +59,11 @@ class PythonVulnerabilityChecker(VulnerabilityCheckerBase):
 
             if specifier_set.contains(dependency.version):
                 return Vulnerability(
-                    advisory=vulnerability_entry["advisory"].replace('\r', '').replace('\n', ' '),  # remove line breaks to avoid breaking Github table formating
+                    advisory=vulnerability_entry["advisory"]
+                    .replace("\r", "")
+                    .replace(
+                        "\n", " "
+                    ),  # remove line breaks to avoid breaking Github table formating
                     cve=vulnerability_entry.get("cve"),
                     versions_impacted=constraint,
                 )
