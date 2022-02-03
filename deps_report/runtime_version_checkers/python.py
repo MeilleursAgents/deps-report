@@ -53,6 +53,6 @@ class PythonRuntimeVersionChecker(RuntimeVersionCheckerBase):
             != current_version_informations["cycle"],
             current_version_eol_date=eol_date,
             current_version_is_eol_soon=eol_date
-            <= (date.today() + timedelta(days=30 * 3)),
+            <= (date.today() + timedelta(days=30 * 3)) and eol_date > date.today(),
             current_version_is_eol=eol_date < date.today(),
         )
