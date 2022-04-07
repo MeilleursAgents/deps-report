@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from datetime import date, timedelta
 
 import aiohttp
@@ -29,6 +30,12 @@ class PythonRuntimeVersionChecker(RuntimeVersionCheckerBase):
             logger.error(error_msg)
             raise VerificationError(error_msg)
 
+        # If the current version includes a patch level, we remove it else we cannot compare it
+        version_with_patch_pattern = re.compile("[0-9]\\.[0-9]+\\.[0-9]+")
+        if re.match(version_with_patch_pattern, current_version):
+            current_version = ".".join(current_version.split(".")[:-1])
+
+        # Try to get informations corresponding to the current version
         current_version_informations = next(
             (
                 item
@@ -37,13 +44,13 @@ class PythonRuntimeVersionChecker(RuntimeVersionCheckerBase):
             ),
             None,
         )
-        latest_version_informations = data[0]
 
         if current_version_informations is None:
             error_msg = "Unknown Python version, skipping runtime version checking"
             logger.error(error_msg)
             raise VerificationError(error_msg)
 
+        latest_version_informations = data[0]
         eol_date: date = parse(current_version_informations["eol"]).date()
         return RuntimeInformations(
             name="Python",
