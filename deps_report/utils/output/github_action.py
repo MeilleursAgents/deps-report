@@ -1,7 +1,8 @@
 import json
+import logging
 import os
 
-from github import Github
+from github import Github, GithubException
 from tabulate import tabulate
 
 from deps_report.models import RuntimeInformations
@@ -10,6 +11,8 @@ from deps_report.utils.output.common import (
     get_display_output_for_dependency,
     get_number_of_dependencies_with_outdated_major,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def _get_workflow_run_url() -> str:
@@ -57,10 +60,13 @@ def _post_github_pr_comment(msg: str) -> None:
             existing_comment = comment
             break
 
-    if existing_comment:
-        existing_comment.edit(msg)
-    else:
-        gh_pr.create_issue_comment(msg)
+    try:
+        if existing_comment:
+            existing_comment.edit(msg)
+        else:
+            gh_pr.create_issue_comment(msg)
+    except GithubException:
+        logger.error("Unable to post/edit comment on PR")
 
 
 def send_github_pr_comment_with_results(
