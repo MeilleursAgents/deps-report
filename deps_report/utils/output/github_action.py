@@ -8,8 +8,8 @@ from tabulate import tabulate
 from deps_report.models import RuntimeInformations
 from deps_report.models.results import ErrorResult, VersionResult, VulnerabilityResult
 from deps_report.utils.output.common import (
+    get_dependencies_with_outdated_major,
     get_display_output_for_dependency,
-    get_number_of_dependencies_with_outdated_major,
 )
 
 logger = logging.getLogger(__name__)
@@ -107,10 +107,21 @@ def send_github_pr_comment_with_results(
 
     msg += "## Outdated dependencies\n"
     if len(versions_results) > 0:
-        outdated_major_count = get_number_of_dependencies_with_outdated_major(
-            versions_results
+        outdated_major = get_dependencies_with_outdated_major(versions_results)
+        msg += f"<details><summary> <b>{len(versions_results)}</b> outdated dependencies found (including {len(outdated_major)} outdated major versions)😢</summary>\n\n"
+        major_versions_table = tabulate(
+            [
+                (
+                    get_display_output_for_dependency(item.dependency),
+                    item.installed_version,
+                    item.latest_version,
+                )
+                for item in outdated_major
+            ],
+            ["Dependency", "Installed version", "Latest version"],
+            tablefmt="github",
         )
-        msg += f"<details><summary> <b>{len(versions_results)}</b> outdated dependencies found (including {outdated_major_count} outdated major versions)😢</summary>\n\n"
+        msg += f"{major_versions_table}\n"
         versions_table = tabulate(
             [
                 (
@@ -119,6 +130,7 @@ def send_github_pr_comment_with_results(
                     item.latest_version,
                 )
                 for item in versions_results
+                if item not in outdated_major
             ],
             ["Dependency", "Installed version", "Latest version"],
             tablefmt="github",
