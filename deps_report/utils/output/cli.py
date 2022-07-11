@@ -4,8 +4,8 @@ from tabulate import tabulate
 from deps_report.models.results import ErrorResult, VersionResult, VulnerabilityResult
 from deps_report.models.runtime_informations import RuntimeInformations
 from deps_report.utils.output.common import (
+    get_dependencies_with_outdated_major,
     get_display_output_for_dependency,
-    get_number_of_dependencies_with_outdated_major,
 )
 
 
@@ -55,11 +55,9 @@ def print_results_stdout(
         click.echo(vulnerabilities_table)
 
     if len(versions_results) > 0:
-        outdated_major_count = get_number_of_dependencies_with_outdated_major(
-            versions_results
-        )
+        outdated_major = get_dependencies_with_outdated_major(versions_results)
         click.secho(
-            f"\n{len(versions_results)} outdated dependencies found (including {outdated_major_count} outdated major versions):",
+            f"\n{len(versions_results)} outdated dependencies found (including {len(outdated_major)} outdated major versions):",
             fg="red",
         )
         versions_table = tabulate(

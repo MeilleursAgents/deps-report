@@ -18,9 +18,11 @@ def get_display_output_for_dependency(dependency: Dependency) -> str:
     return f"{dependency.name} ({','.join(properties)})"
 
 
-def get_number_of_dependencies_with_outdated_major(results: list[VersionResult]) -> int:
-    """Get the number of dependencies with outdated major versions."""
-    count = 0
+def get_dependencies_with_outdated_major(
+    results: list[VersionResult],
+) -> list[VersionResult]:
+    """Get the dependencies with outdated major versions."""
+    deps = []
 
     for result in results:
         latest_version = version_parser.parse(result.latest_version)
@@ -32,6 +34,6 @@ def get_number_of_dependencies_with_outdated_major(results: list[VersionResult])
             continue
 
         if latest_version.major > installed_version.major:
-            count += 1
+            deps.append(result)
 
-    return count
+    return deps
