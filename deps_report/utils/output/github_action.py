@@ -121,7 +121,7 @@ def send_github_pr_comment_with_results(
             ["Dependency", "Installed version", "Latest version"],
             tablefmt="github",
         )
-        msg += f"{major_versions_table}\n"
+        msg += f"{major_versions_table}\n\n"
         versions_table = tabulate(
             [
                 (
