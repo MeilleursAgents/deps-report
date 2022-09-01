@@ -14,7 +14,7 @@ style:
 	$(PYTHON) black --check $(CODE_DIR) $(TESTS_DIR)
 	$(PYTHON) isort --check-only $(CODE_DIR) $(TESTS_DIR)
 	$(PYTHON) mypy -- $(CODE_DIR)
-	$(PYTHON) pflake8 $(CODE_DIR)
+	$(PYTHON) flake8 $(CODE_DIR)
 
 .PHONY: test
 .SILENT: test
