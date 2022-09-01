@@ -81,6 +81,7 @@ def send_github_pr_comment_with_results(
 
     msg = ""
 
+    # Runtime informations
     if runtime_informations and runtime_informations.current_version_is_outdated:
         msg += f"ℹ️ {runtime_informations.name} version {runtime_informations.current_version} is used by your project but the latest version is {runtime_informations.latest_version}.\n\n"
         if runtime_informations.current_version_is_eol_soon:
@@ -88,6 +89,7 @@ def send_github_pr_comment_with_results(
         elif runtime_informations.current_version_is_eol:
             msg += f"🚨<b>Your {runtime_informations.name} version **reached** EOL date on {runtime_informations.current_version_eol_date}, you should upgrade !</b>\n\n"
 
+    # Vulnerable dependencies
     if len(vulnerabilities_results) > 0:
         msg += "## Vulnerable dependencies\n"
         msg += f"<details><summary> <b>{len(vulnerabilities_results)}</b> dependencies have vulnerabilities 😱</summary>\n\n"
@@ -105,23 +107,27 @@ def send_github_pr_comment_with_results(
         )
         msg += f"{vulnerabilities_table}\n</details>\n\n"
 
+    # Outdated dependencies
     msg += "## Outdated dependencies\n"
     if len(versions_results) > 0:
         outdated_major = get_dependencies_with_outdated_major(versions_results)
         msg += f"<details><summary> <b>{len(versions_results)}</b> outdated dependencies found (including {len(outdated_major)} outdated major versions)😢</summary>\n\n"
-        major_versions_table = tabulate(
-            [
-                (
-                    get_display_output_for_dependency(item.dependency),
-                    item.installed_version,
-                    item.latest_version,
-                )
-                for item in outdated_major
-            ],
-            ["Dependency", "Installed version", "Latest version"],
-            tablefmt="github",
-        )
-        msg += f"{major_versions_table}\n\n"
+
+        if len(outdated_major) > 0:
+            major_versions_table = tabulate(
+                [
+                    (
+                        get_display_output_for_dependency(item.dependency),
+                        item.installed_version,
+                        item.latest_version,
+                    )
+                    for item in outdated_major
+                ],
+                ["Dependency", "Installed version", "Latest version"],
+                tablefmt="github",
+            )
+            msg += f"{major_versions_table}\n\n"
+
         versions_table = tabulate(
             [
                 (
