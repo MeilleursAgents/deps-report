@@ -1,7 +1,7 @@
 from dataclasses import dataclass
+from pydantic import BaseModel
 
 
-@dataclass
-class DependencyRepository:
+class DependencyRepository(BaseModel):
     name: str
     url: str
