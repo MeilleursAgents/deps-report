@@ -1,6 +1,10 @@
 import asyncio
 import itertools
+import json
 import os
+import sys
+from csv import DictReader
+from pathlib import Path
 
 import click
 
@@ -60,6 +64,55 @@ async def _process_project(
     )
 
 
+async def _process_project_json(
+    dependencies: list[Dependency],
+    dependencies_version_checker: DependenciesVersionCheckerBase,
+    vulnerability_checker: VulnerabilityCheckerBase,
+    runtimes_informations: RuntimeInformations | None,
+    output_file: Path,
+) -> None:
+    versions_results: list[VersionResult] = []
+    vulnerabilities_results: list[VulnerabilityResult] = []
+    errors_results: list[ErrorResult] = []
+
+    click.echo("Processing dependencies...")
+    results = await asyncio.gather(
+        *[
+            process_dependency(
+                dependencies_version_checker, vulnerability_checker, dependency
+            )
+            for dependency in dependencies
+        ]
+    )
+
+    versions_results, vulnerabilities_results, errors_results = map(list, zip(*results))  # type: ignore
+    errors_results = list(itertools.chain(*errors_results))  # type: ignore
+
+    # Filter empty results
+    versions_results = list(filter(None, versions_results))
+    vulnerabilities_results = list(filter(None, vulnerabilities_results))
+
+    result_dict = {
+        "version_results": [v.dict() for v in versions_results],
+        "vulnerabilities_result": [v.dict() for v in vulnerabilities_results],
+        "errors_results": [v.dict() for v in errors_results],
+        "runtime_informations": runtimes_informations.dict(),
+    }
+    # FIXME : quickfix to avoid not serializable date error
+    result_dict["runtime_informations"]["current_version_eol_date"] = result_dict[
+        "runtime_informations"
+    ]["current_version_eol_date"].isoformat()
+
+    with output_file.open("w") as fp:
+        json.dump(result_dict, fp)
+
+    click.echo(f"Results saved in {str(output_file)}")
+    # Print in stdout and send github comment if on Github
+    print_results_stdout(
+        versions_results, vulnerabilities_results, errors_results, runtimes_informations
+    )
+
+
 def _get_file_path(file: str) -> str:
     ctx = click.get_current_context()
     if not file:
@@ -112,9 +165,78 @@ async def main(file: str) -> None:
         except VerificationError:
             runtime_informations = None
 
-    await _process_project(
+    await _process_project_json(
         dependencies,
         dependencies_version_checker,
         vulnerability_checker,
         runtime_informations,
     )
+
+
+async def main_no_click(file, output_file):
+    click.secho(f"deps-report v{__version__}", fg="green")
+    click.secho(f"File is: {file}", fg="yellow")
+
+    parser_class = get_parser_for_file_path(file)
+    dependencies = parser_class.get_dependencies()
+    runtime_version = parser_class.get_runtime_version()
+
+    click.secho(f"Found {len(dependencies)} dependencies\n", fg="yellow")
+
+    dependencies_version_checker = get_dependencies_version_checker_for_parser(
+        type(parser_class)
+    )
+    vulnerability_checker = await get_vulnerability_checker_for_parser(
+        type(parser_class)
+    )
+
+    runtime_informations: RuntimeInformations | None = None
+    if runtime_version:
+        try:
+            runtime_informations = await get_runtime_version_checker_for_parser(
+                type(parser_class)
+            ).get_runtime_informations(runtime_version)
+        except VerificationError:
+            runtime_informations = None
+
+    await _process_project_json(
+        dependencies,
+        dependencies_version_checker,
+        vulnerability_checker,
+        runtime_informations,
+        output_file,
+    )
+
+
+def do_all(ma_apps_path):
+    loop = asyncio.new_event_loop()
+    with ma_apps_path.open("r") as fp:
+        reader = DictReader(fp)
+        for row in reader:
+            if row.get("pipfile.lock"):
+                app_name = row.get("full_name").lower()
+                click.echo(f"{app_name} found pipfile.lock")
+                pipfile_lock_path = ma_apps_path.parent.joinpath(
+                    Path(row.get("pipfile.lock"))
+                )
+                output_file = pipfile_lock_path.with_name("out.json")
+                click.echo(f"output is : {str(output_file)}")
+                if not output_file.exists():
+                    if app_name not in [
+                        "meilleursagents/de-indices",
+                        "meilleursagents/e2e-api-data",
+                    ]:
+                        loop.run_until_complete(
+                            main_no_click(str(pipfile_lock_path), output_file)
+                        )
+                    else:
+                        click.echo(f"skipping {app_name} not supported")
+                else:
+                    click.echo(f"skipping {app_name} output already exists")
+            else:
+                click.echo(f"{row.get('full_name')} does not have pipfile.lock")
+
+
+if __name__ == "__main__":
+    ma_apps_path = Path("ma-repos.csv")
+    do_all(ma_apps_path)

@@ -2,9 +2,9 @@ from dataclasses import dataclass
 
 from deps_report.models.dependency_repository import DependencyRepository
 
-
-@dataclass
-class Dependency:
+from pydantic import BaseModel
+# @dataclass
+class Dependency(BaseModel):
     name: str
     version: str
     repositories: list[DependencyRepository]

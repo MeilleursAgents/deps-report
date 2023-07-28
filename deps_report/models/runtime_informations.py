@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from datetime import date
 
+from pydantic import BaseModel
 
-@dataclass
-class RuntimeInformations:
+# @dataclass
+class RuntimeInformations(BaseModel):
     name: str
     current_version: str
     latest_version: str
