@@ -1,13 +1,13 @@
 name: deps-report
 author: Corentin Garcia <cgarcia@meilleursagents.com>
 description: Display a report of installed dependencies
+inputs:
+  file:
+    description: "The path to the dependencies file (e.g., pyproject.toml)"
+    required: true
+  github_token:
+    description: "GitHub token to comment on the PR"
+    required: true
 runs:
   using: 'docker'
   image: 'Dockerfile'
-inputs:
-  file:
-    description: "The path to the dependencies file (Pipfile.lock...)"
-    required: true
-  github_token:
-    description: "Github token to comment on the PR"
-    required: true
