@@ -62,7 +62,7 @@ class PythonPoetryParser(ParserBase):
                 Dependency(
                     name=name,
                     version=package["version"],
-                    for_dev=package["category"] == "dev",
+                    for_dev=False,
                     repositories=[repositories["pypi"]],
                     transitive=self._is_transitive_dependency(
                         pyproject_file_content, name
