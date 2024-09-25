@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Install build tools if needed (e.g., for dependencies that require compilation)
+# Install build tools if needed
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
@@ -8,22 +8,25 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Set the working directory to /app
 WORKDIR /app
 
-# Copy the action's code into the Docker image
+# Copy the action's code into /app
 COPY . /app
 
 # Install poetry
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir poetry
 
-# Install deps-report from the local source code
+# Install deps-report from the local source
 RUN poetry config virtualenvs.create false \
     && poetry install --no-dev
 
-# Set the working directory to the GitHub workspace where the user's code is checked out
-WORKDIR /github/workspace
+# Copy the entry point script into the Docker image
+COPY entrypoint.sh /entrypoint.sh
 
-# Set the entrypoint to run deps-report
-ENTRYPOINT ["deps-report"]
+# Make the entry point script executable
+RUN chmod +x /entrypoint.sh
 
-# (Optional) Set the default command to display help if no arguments are provided
+# Set the entry point to the script
+ENTRYPOINT ["/entrypoint.sh"]
+
+# Default command (optional)
 CMD ["--help"]

@@ -87,6 +87,10 @@ def _get_file_path(file: str) -> str:
 async def main(file: str) -> None:
     """Generate report for the state of your dependencies."""
     click.secho(f"deps-report v{__version__}", fg="green")
+    click.secho(f"Current working directory: {os.getcwd()}", fg="yellow")
+    click.secho(f"File argument provided: {file}", fg="yellow")
+    click.secho(f"GITHUB_WORKSPACE: {os.environ.get('GITHUB_WORKSPACE')}", fg="yellow")
+
     file = _get_file_path(file)
     click.secho(f"File is: {file}", fg="yellow")
 
