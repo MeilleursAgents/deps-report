@@ -1,5 +1,6 @@
 import asyncio
 import itertools
+import logging
 import os
 
 import click
@@ -95,7 +96,15 @@ async def main(file: str) -> None:
     click.secho(f"File is: {file}", fg="yellow")
 
     parser_class = get_parser_for_file_path(file)
-    dependencies = parser_class.get_dependencies()
+    try:
+        dependencies = parser_class.get_dependencies()
+    except Exception as e:
+        logging.exception(e)
+        click.secho(
+            f"An error occurred while trying to parse the dependencies from the file {file}",
+            fg="red",
+        )
+        return
     runtime_version = parser_class.get_runtime_version()
 
     click.secho(f"Found {len(dependencies)} dependencies\n", fg="yellow")
