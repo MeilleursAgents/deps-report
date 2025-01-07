@@ -17,7 +17,7 @@ RUN pip install --no-cache-dir --upgrade pip \
 
 # Install deps-report from the local source
 RUN poetry config virtualenvs.create false \
-    && poetry install --no-dev
+    && poetry install --without dev
 
 # Copy the entry point script into the Docker image
 COPY entrypoint.sh /entrypoint.sh
